@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
@@ -13,6 +14,21 @@ if (!process.env.ADMIN_PASSWORD) {
   console.warn('WARNING: ADMIN_PASSWORD env var not set. Using insecure default password.');
 }
 
+function checkPassword(input) {
+  try {
+    const a = Buffer.from(String(input));
+    const b = Buffer.from(ADMIN_PASSWORD);
+    if (a.length !== b.length) {
+      // Still do comparison to prevent timing leak on length
+      crypto.timingSafeEqual(Buffer.alloc(b.length), b);
+      return false;
+    }
+    return crypto.timingSafeEqual(a, b);
+  } catch {
+    return false;
+  }
+}
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const gameState = {
@@ -21,6 +37,7 @@ const gameState = {
   currentRound: -1,
   timer: null,
   timerRemaining: 0,
+  advanceTimeout: null,
 };
 
 const players = new Map(); // socketId -> {nickname, vote, isSpectator, isAdmin, connected}
@@ -149,7 +166,9 @@ function endRound() {
   broadcastGameState(true);
 
   // Auto-advance after 5 seconds
-  setTimeout(() => {
+  if (gameState.advanceTimeout) clearTimeout(gameState.advanceTimeout);
+  gameState.advanceTimeout = setTimeout(() => {
+    gameState.advanceTimeout = null;
     const nextRound = gameState.currentRound + 1;
     if (nextRound >= gameState.rounds.length) {
       gameState.status = 'finished';
@@ -175,21 +194,24 @@ io.on('connection', (socket) => {
   });
 
   socket.on('join', ({ nickname }) => {
+    if (typeof nickname !== 'string') return;
+    const sanitized = nickname.trim().slice(0, 30);
+    if (!sanitized) return;
     const isSpectator = gameState.status === 'playing';
     players.set(socket.id, {
-      nickname,
+      nickname: sanitized,
       vote: null,
       isSpectator,
       isAdmin: false,
       connected: true,
     });
 
-    socket.emit('joined', { nickname, isSpectator, isAdmin: false });
+    socket.emit('joined', { nickname: sanitized, isSpectator, isAdmin: false });
     broadcastGameState(false);
   });
 
   socket.on('adminLogin', ({ password }) => {
-    if (password === ADMIN_PASSWORD) {
+    if (checkPassword(password)) {
       adminSocketId = socket.id;
       if (!players.has(socket.id)) {
         players.set(socket.id, {
@@ -211,7 +233,7 @@ io.on('connection', (socket) => {
 
   socket.on('adminVote', ({ option }) => {
     const player = players.get(socket.id);
-    if (player && player.isAdmin && gameState.status === 'playing') {
+    if (player && player.isAdmin && gameState.status === 'playing' && (option === 'A' || option === 'B')) {
       adminVote = option;
       socket.emit('adminVoteRecorded', { option });
     }
@@ -219,7 +241,7 @@ io.on('connection', (socket) => {
 
   socket.on('vote', ({ option }) => {
     const player = players.get(socket.id);
-    if (player && !player.isSpectator && !player.isAdmin && gameState.status === 'playing') {
+    if (player && !player.isSpectator && !player.isAdmin && gameState.status === 'playing' && (option === 'A' || option === 'B')) {
       player.vote = option;
       // Broadcast vote counts (without revealing individual votes)
       let aCount = 0, bCount = 0;
@@ -237,7 +259,15 @@ io.on('connection', (socket) => {
   socket.on('createGame', ({ rounds }) => {
     const player = players.get(socket.id);
     if (player && player.isAdmin) {
-      gameState.rounds = rounds;
+      if (!Array.isArray(rounds) || rounds.length === 0) return;
+      const validated = rounds.map(r => ({
+        topic: String(r.topic || '').trim().slice(0, 200),
+        optionA: String(r.optionA || '').trim().slice(0, 100),
+        optionB: String(r.optionB || '').trim().slice(0, 100),
+        durationSeconds: Math.min(Math.max(parseInt(r.durationSeconds, 10) || 30, 5), 300),
+      })).filter(r => r.topic && r.optionA && r.optionB);
+      if (validated.length === 0) return;
+      gameState.rounds = validated;
       gameState.status = 'waiting';
       gameState.currentRound = -1;
       broadcastGameState(false);
@@ -255,6 +285,10 @@ io.on('connection', (socket) => {
   socket.on('nextRound', () => {
     const player = players.get(socket.id);
     if (player && player.isAdmin) {
+      if (gameState.advanceTimeout) {
+        clearTimeout(gameState.advanceTimeout);
+        gameState.advanceTimeout = null;
+      }
       if (gameState.timer) {
         clearInterval(gameState.timer);
         gameState.timer = null;
@@ -272,6 +306,10 @@ io.on('connection', (socket) => {
   socket.on('resetGame', () => {
     const player = players.get(socket.id);
     if (player && player.isAdmin) {
+      if (gameState.advanceTimeout) {
+        clearTimeout(gameState.advanceTimeout);
+        gameState.advanceTimeout = null;
+      }
       if (gameState.timer) {
         clearInterval(gameState.timer);
         gameState.timer = null;
