@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Balance Game</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0f0f1a;
+      color: #e0e0f0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a855f7, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    .logo p {
+      color: #6b7280;
+      margin-top: 6px;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .card h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #c4b5fd;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #9ca3af;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      background: #0f0f1a;
+      border: 1px solid #2a2a4a;
+      border-radius: 10px;
+      color: #e0e0f0;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+    }
+
+    input[type="text"]::placeholder {
+      color: #4b5563;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #a855f7, #3b82f6);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(168, 85, 247, 0.45);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid #2a2a4a;
+      color: #9ca3af;
+      margin-top: 12px;
+    }
+
+    .btn-secondary:hover {
+      border-color: #a855f7;
+      color: #c4b5fd;
+      background: rgba(168, 85, 247, 0.05);
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #2a2a4a;
+      margin: 24px 0;
+    }
+
+    .notice {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .notice.info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #93c5fd;
+    }
+
+    .notice.warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fcd34d;
+    }
+
+    .notice.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .online-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      color: #86efac;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      float: right;
+      margin-top: 2px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .rejoin-banner {
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .rejoin-banner p {
+      font-size: 0.88rem;
+      color: #c4b5fd;
+      margin-bottom: 10px;
+    }
+
+    .rejoin-banner .rejoin-name {
+      font-weight: 700;
+      color: #e9d5ff;
+    }
+
+    .btn-rejoin {
+      display: inline-block;
+      padding: 8px 16px;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #c4b5fd;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 8px;
+    }
+
+    .btn-rejoin:hover {
+      background: rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-new-session {
+      display: inline-block;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid #2a2a4a;
+      color: #6b7280;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-new-session:hover {
+      border-color: #4b5563;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>⚖️ Balance Game</h1>
+      <p>Pick a side. Stay alive.</p>
+    </div>
+
+    <div class="card">
+      <h2>
+        Join the Game
+        <span class="online-badge" id="onlineCount">
+          <span class="dot"></span>
+          <span id="countNum">–</span> online
+        </span>
+      </h2>
+
+      <div class="rejoin-banner" id="rejoinBanner">
+        <p>Welcome back, <span class="rejoin-name" id="rejoinName"></span>! Want to rejoin?</p>
+        <button class="btn-rejoin" id="btnRejoin">Rejoin Game</button>
+        <button class="btn-new-session" id="btnNewSession">New Session</button>
+      </div>
+
+      <div class="notice info" id="spectatorNotice">
+        ⚡ The game is in progress — you'll join as a <strong>spectator</strong>.
+      </div>
+
+      <div class="notice warning" id="waitingNotice">
+        ⏳ Waiting for the host to start the game.
+      </div>
+
+      <div class="notice error" id="errorNotice"></div>
+
+      <div class="form-group">
+        <label for="nickname">Your Nickname</label>
+        <input
+          type="text"
+          id="nickname"
+          placeholder="Enter a nickname..."
+          maxlength="24"
+          autocomplete="off"
+          autofocus
+        />
+      </div>
+
+      <button class="btn btn-primary" id="btnJoin">Join Game</button>
+
+      <hr class="divider" />
+
+      <a href="/admin.html" class="btn btn-secondary">🔐 Admin Dashboard</a>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let gameStatus = 'waiting';
+
+    const nicknameInput = document.getElementById('nickname');
+    const btnJoin = document.getElementById('btnJoin');
+    const spectatorNotice = document.getElementById('spectatorNotice');
+    const waitingNotice = document.getElementById('waitingNotice');
+    const errorNotice = document.getElementById('errorNotice');
+    const countNum = document.getElementById('countNum');
+    const rejoinBanner = document.getElementById('rejoinBanner');
+    const rejoinName = document.getElementById('rejoinName');
+    const btnRejoin = document.getElementById('btnRejoin');
+    const btnNewSession = document.getElementById('btnNewSession');
+
+    // Check for existing session
+    const savedNickname = sessionStorage.getItem('nickname');
+    if (savedNickname) {
+      rejoinName.textContent = savedNickname;
+      rejoinBanner.style.display = 'block';
+      nicknameInput.value = savedNickname;
+    }
+
+    btnRejoin.addEventListener('click', () => {
+      const name = sessionStorage.getItem('nickname');
+      if (name) joinGame(name);
+    });
+
+    btnNewSession.addEventListener('click', () => {
+      sessionStorage.removeItem('nickname');
+      rejoinBanner.style.display = 'none';
+      nicknameInput.value = '';
+      nicknameInput.focus();
+    });
+
+    socket.on('gameState', (state) => {
+      gameStatus = state.status;
+      countNum.textContent = state.onlineCount;
+
+      if (state.status === 'playing') {
+        spectatorNotice.style.display = 'block';
+        waitingNotice.style.display = 'none';
+      } else if (state.status === 'waiting') {
+        spectatorNotice.style.display = 'none';
+        waitingNotice.style.display = 'block';
+      } else {
+        spectatorNotice.style.display = 'none';
+        waitingNotice.style.display = 'none';
+      }
+    });
+
+    socket.on('joined', ({ nickname, isSpectator }) => {
+      sessionStorage.setItem('nickname', nickname);
+      sessionStorage.setItem('isSpectator', isSpectator ? 'true' : 'false');
+      window.location.href = '/game.html';
+    });
+
+    function joinGame(name) {
+      name = (name || '').trim();
+      if (!name) {
+        showError('Please enter a nickname.');
+        nicknameInput.focus();
+        return;
+      }
+      hideError();
+      btnJoin.textContent = 'Joining…';
+      btnJoin.disabled = true;
+      socket.emit('join', { nickname: name });
+    }
+
+    btnJoin.addEventListener('click', () => joinGame(nicknameInput.value));
+
+    nicknameInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') joinGame(nicknameInput.value);
+    });
+
+    function showError(msg) {
+      errorNotice.textContent = msg;
+      errorNotice.style.display = 'block';
+    }
+
+    function hideError() {
+      errorNotice.style.display = 'none';
+    }
+  </script>
+</body>
+</html>

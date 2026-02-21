@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Balance Game – Play</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --border: #2a2a4a;
+      --text: #e0e0f0;
+      --muted: #6b7280;
+      --purple: #a855f7;
+      --blue: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      margin-bottom: 16px;
+    }
+
+    .game-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .topbar-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-alive {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+
+    .badge-spectator {
+      background: rgba(107, 114, 128, 0.12);
+      border: 1px solid rgba(107, 114, 128, 0.3);
+      color: #9ca3af;
+    }
+
+    .badge-online {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+    /* ── Screens ── */
+    .screen {
+      width: 100%;
+      max-width: 700px;
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .screen.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── Waiting screen ── */
+    .waiting-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .waiting-box .big-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .waiting-box h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 10px; }
+    .waiting-box p { color: var(--muted); font-size: 0.95rem; }
+
+    .spinner {
+      display: inline-block;
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin: 24px auto 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Playing screen ── */
+    .round-header {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .round-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .round-topic {
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .timer-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .timer-circle {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: conic-gradient(var(--purple) var(--progress, 100%), var(--border) 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .timer-circle::before {
+      content: '';
+      position: absolute;
+      width: 50px; height: 50px;
+      background: var(--card);
+      border-radius: 50%;
+    }
+
+    .timer-num {
+      position: relative;
+      z-index: 1;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .timer-urgent { color: var(--red); }
+
+    /* ── Vote buttons ── */
+    .vote-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .vote-btn {
+      position: relative;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .vote-btn:hover:not(:disabled) {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .vote-btn.vote-a:hover:not(:disabled),
+    .vote-btn.vote-a.selected {
+      border-color: var(--purple);
+      background: rgba(168, 85, 247, 0.08);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+    }
+
+    .vote-btn.vote-b:hover:not(:disabled),
+    .vote-btn.vote-b.selected {
+      border-color: var(--blue);
+      background: rgba(59, 130, 246, 0.08);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .vote-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .vote-letter {
+      font-size: 2rem;
+      font-weight: 900;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .vote-a .vote-letter { color: var(--purple); }
+    .vote-b .vote-letter { color: var(--blue); }
+
+    .vote-option-text {
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .spectator-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 15, 26, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      backdrop-filter: blur(2px);
+      border-radius: 14px;
+    }
+
+    .vote-counts-row {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .vote-counts-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .vote-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vote-bar-track {
+      flex: 1;
+      height: 10px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .vote-bar-fill-a {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), #c084fc);
+      border-radius: 10px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    .vote-bar-fill-b {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), #60a5fa);
+      border-radius: 10px;
+      transition: width 0.4s ease;
+      width: 0%;
+      margin-left: auto;
+    }
+
+    .vote-count-nums {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .count-a { color: #c084fc; }
+    .count-b { color: #60a5fa; }
+
+    /* ── Players strip ── */
+    .players-strip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+    }
+
+    .players-strip-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .players-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .player-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .player-chip.alive {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      color: #86efac;
+    }
+
+    .player-chip.spectator {
+      background: rgba(107, 114, 128, 0.1);
+      border: 1px solid rgba(107, 114, 128, 0.2);
+      color: #9ca3af;
+      text-decoration: line-through;
+    }
+
+    .player-chip.admin {
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      color: #c4b5fd;
+    }
+
+    .player-chip.offline { opacity: 0.4; }
+
+    /* ── Finished screen ── */
+    .finished-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .finished-box .big-emoji { font-size: 4rem; margin-bottom: 16px; }
+    .finished-box h2 { font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
+    .finished-box p { color: var(--muted); font-size: 1rem; }
+
+    .survivors-list {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .survivor-chip {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #86efac;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* ── Round result overlay ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+      padding: 20px;
+    }
+
+    .overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+
+    .overlay-card {
+      background: #1e1e35;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    }
+
+    .result-icon { font-size: 3.5rem; margin-bottom: 12px; }
+    .result-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+    .result-sub { color: var(--muted); font-size: 0.92rem; margin-bottom: 20px; }
+
+    .result-counts {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .result-count-item {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+    }
+
+    .result-count-item.side-a {
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+    }
+
+    .result-count-item.side-b {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .result-count-num {
+      font-size: 2rem;
+      font-weight: 900;
+    }
+
+    .side-a .result-count-num { color: #c084fc; }
+    .side-b .result-count-num { color: #60a5fa; }
+
+    .result-count-label { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    .admin-used-note {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fcd34d;
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    .overlay-progress {
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin-top: 24px;
+      overflow: hidden;
+    }
+
+    .overlay-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple), var(--blue));
+      border-radius: 4px;
+      width: 100%;
+      transition: width linear;
+    }
+
+    /* ── My result banner ── */
+    .my-result-banner {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 14px;
+    }
+
+    .my-result-survived {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+
+    .my-result-eliminated {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    @media (max-width: 500px) {
+      .vote-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .vote-btn { padding: 20px 12px; }
+      .vote-letter { font-size: 1.5rem; }
+      .vote-option-text { font-size: 0.88rem; }
+      .round-topic { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="game-title">⚖️ Balance</span>
+    <div class="topbar-right">
+      <span class="badge badge-online">
+        <span class="dot"></span>
+        <span id="onlineCount">–</span>
+      </span>
+      <span class="badge" id="statusBadge"></span>
+    </div>
+  </div>
+
+  <!-- Waiting screen -->
+  <div class="screen active" id="screenWaiting">
+    <div class="waiting-box">
+      <div class="big-emoji">⏳</div>
+      <h2>Waiting for Host</h2>
+      <p>The game hasn't started yet. Hang tight!</p>
+      <div class="spinner"></div>
+    </div>
+  </div>
+
+  <!-- Playing screen -->
+  <div class="screen" id="screenPlaying">
+    <div class="round-header">
+      <div class="round-label" id="roundLabel">Round 1</div>
+      <div class="round-topic" id="roundTopic">Loading…</div>
+      <div class="timer-row">
+        <div class="timer-circle" id="timerCircle" style="--progress: 100%">
+          <span class="timer-num" id="timerNum">–</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vote-counts-row">
+      <div class="vote-counts-label">Live Vote Counts</div>
+      <div class="vote-bar-wrap">
+        <span class="count-a" id="countA">0</span>
+        <div class="vote-bar-track">
+          <div class="vote-bar-fill-a" id="barA"></div>
+        </div>
+        <div class="vote-bar-track" style="direction:rtl">
+          <div class="vote-bar-fill-b" id="barB"></div>
+        </div>
+        <span class="count-b" id="countB">0</span>
+      </div>
+    </div>
+
+    <div class="vote-grid">
+      <button class="vote-btn vote-a" id="btnA">
+        <span class="vote-letter">A</span>
+        <span class="vote-option-text" id="optionAText">Option A</span>
+        <div class="spectator-overlay" id="overlayA" style="display:none">👁 Spectator</div>
+      </button>
+      <button class="vote-btn vote-b" id="btnB">
+        <span class="vote-letter">B</span>
+        <span class="vote-option-text" id="optionBText">Option B</span>
+        <div class="spectator-overlay" id="overlayB" style="display:none">👁 Spectator</div>
+      </button>
+    </div>
+
+    <div class="players-strip">
+      <div class="players-strip-label">Players</div>
+      <div class="players-list" id="playersList"></div>
+    </div>
+  </div>
+
+  <!-- Finished screen -->
+  <div class="screen" id="screenFinished">
+    <div class="finished-box">
+      <div class="big-emoji">🏆</div>
+      <h2>Game Over!</h2>
+      <p>The game has ended. Thanks for playing!</p>
+      <div class="survivors-list" id="survivorsList"></div>
+      <div style="margin-top:32px">
+        <a href="/" style="color:var(--purple);text-decoration:none;font-weight:600">← Play Again</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Round result overlay -->
+  <div class="overlay" id="resultOverlay">
+    <div class="overlay-card">
+      <div class="result-icon" id="resultIcon">⚖️</div>
+      <div class="result-title" id="resultTitle">Round Over</div>
+      <div class="result-sub" id="resultSub"></div>
+      <div class="result-counts">
+        <div class="result-count-item side-a">
+          <div class="result-count-num" id="resultCountA">0</div>
+          <div class="result-count-label">Voted A</div>
+        </div>
+        <div class="result-count-item side-b">
+          <div class="result-count-num" id="resultCountB">0</div>
+          <div class="result-count-label">Voted B</div>
+        </div>
+      </div>
+      <div class="admin-used-note" id="adminUsedNote" style="display:none">
+        🗳️ Admin tiebreaker was used!
+      </div>
+      <div class="my-result-banner" id="myResultBanner" style="display:none"></div>
+      <div class="overlay-progress">
+        <div class="overlay-progress-fill" id="overlayProgressFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    const nickname = sessionStorage.getItem('nickname');
+    if (!nickname) { window.location.href = '/'; }
+
+    let myVote = null;
+    let amSpectator = sessionStorage.getItem('isSpectator') === 'true';
+    let roundDuration = 60;
+    let currentRoundIdx = -1;
+    let gameRounds = [];
+
+    // DOM refs
+    const screenWaiting  = document.getElementById('screenWaiting');
+    const screenPlaying  = document.getElementById('screenPlaying');
+    const screenFinished = document.getElementById('screenFinished');
+    const statusBadge    = document.getElementById('statusBadge');
+    const onlineCountEl  = document.getElementById('onlineCount');
+    const roundLabel     = document.getElementById('roundLabel');
+    const roundTopic     = document.getElementById('roundTopic');
+    const timerNum       = document.getElementById('timerNum');
+    const timerCircle    = document.getElementById('timerCircle');
+    const btnA           = document.getElementById('btnA');
+    const btnB           = document.getElementById('btnB');
+    const optionAText    = document.getElementById('optionAText');
+    const optionBText    = document.getElementById('optionBText');
+    const overlayA       = document.getElementById('overlayA');
+    const overlayB       = document.getElementById('overlayB');
+    const countAEl       = document.getElementById('countA');
+    const countBEl       = document.getElementById('countB');
+    const barA           = document.getElementById('barA');
+    const barB           = document.getElementById('barB');
+    const playersList    = document.getElementById('playersList');
+    const survivorsList  = document.getElementById('survivorsList');
+    const resultOverlay  = document.getElementById('resultOverlay');
+    const resultIcon     = document.getElementById('resultIcon');
+    const resultTitle    = document.getElementById('resultTitle');
+    const resultSub      = document.getElementById('resultSub');
+    const resultCountA   = document.getElementById('resultCountA');
+    const resultCountB   = document.getElementById('resultCountB');
+    const adminUsedNote  = document.getElementById('adminUsedNote');
+    const myResultBanner = document.getElementById('myResultBanner');
+    const overlayProgressFill = document.getElementById('overlayProgressFill');
+
+    function showScreen(name) {
+      [screenWaiting, screenPlaying, screenFinished].forEach(s => s.classList.remove('active'));
+      document.getElementById('screen' + name).classList.add('active');
+    }
+
+    function updateStatusBadge() {
+      if (amSpectator) {
+        statusBadge.className = 'badge badge-spectator';
+        statusBadge.textContent = '👁 Spectator';
+      } else {
+        statusBadge.className = 'badge badge-alive';
+        statusBadge.textContent = '💚 Alive';
+      }
+    }
+
+    function updateTimerCircle(remaining, total) {
+      const pct = total > 0 ? (remaining / total) * 100 : 0;
+      timerCircle.style.setProperty('--progress', pct + '%');
+      timerCircle.style.background =
+        `conic-gradient(${remaining <= 10 ? '#ef4444' : '#a855f7'} ${pct}%, #2a2a4a 0)`;
+      timerNum.textContent = remaining;
+      timerNum.className = 'timer-num' + (remaining <= 10 ? ' timer-urgent' : '');
+    }
+
+    function updateVoteBars(aCount, bCount) {
+      countAEl.textContent = aCount;
+      countBEl.textContent = bCount;
+      const total = aCount + bCount || 1;
+      barA.style.width = ((aCount / total) * 100) + '%';
+      barB.style.width = ((bCount / total) * 100) + '%';
+    }
+
+    function renderPlayers(players) {
+      playersList.innerHTML = '';
+      players.forEach(p => {
+        if (p.isAdmin) { return; }
+        const chip = document.createElement('span');
+        chip.className = 'player-chip ' + (p.isSpectator ? 'spectator' : 'alive') + (p.connected ? '' : ' offline');
+        chip.textContent = (p.isSpectator ? '💀 ' : '💚 ') + p.nickname;
+        if (!p.connected) { chip.title = 'Disconnected'; }
+        playersList.appendChild(chip);
+      });
+    }
+
+    function renderSurvivors(players) {
+      survivorsList.innerHTML = '';
+      const alive = players.filter(p => !p.isSpectator && !p.isAdmin);
+      if (alive.length === 0) {
+        survivorsList.innerHTML = '<p style="color:var(--muted)">No survivors 😢</p>';
+        return;
+      }
+      alive.forEach(p => {
+        const chip = document.createElement('span');
+        chip.className = 'survivor-chip';
+        chip.textContent = '🏆 ' + p.nickname;
+        survivorsList.appendChild(chip);
+      });
+    }
+
+    function setVoteButtons() {
+      const disabled = amSpectator;
+      btnA.disabled = disabled || myVote !== null;
+      btnB.disabled = disabled || myVote !== null;
+      overlayA.style.display = disabled ? 'flex' : 'none';
+      overlayB.style.display = disabled ? 'flex' : 'none';
+      if (myVote === 'A') { btnA.classList.add('selected'); btnB.classList.remove('selected'); }
+      else if (myVote === 'B') { btnB.classList.add('selected'); btnA.classList.remove('selected'); }
+      else { btnA.classList.remove('selected'); btnB.classList.remove('selected'); }
+    }
+
+    // Handle incoming game state
+    socket.on('gameState', (state) => {
+      onlineCountEl.textContent = state.onlineCount + ' online';
+      gameRounds = state.rounds || [];
+
+      // Sync my spectator status
+      const me = state.players.find(p => p.nickname === nickname && !p.isAdmin);
+      if (me) amSpectator = me.isSpectator;
+      updateStatusBadge();
+
+      if (state.status === 'waiting') {
+        showScreen('Waiting');
+        renderPlayers(state.players);
+      } else if (state.status === 'playing') {
+        showScreen('Playing');
+        const round = state.rounds[state.currentRound];
+        if (round) {
+          currentRoundIdx = state.currentRound;
+          roundDuration = round.durationSeconds;
+          roundLabel.textContent = `Round ${state.currentRound + 1} of ${state.rounds.length}`;
+          roundTopic.textContent = round.topic;
+          optionAText.textContent = round.optionA;
+          optionBText.textContent = round.optionB;
+          updateTimerCircle(state.timerRemaining, roundDuration);
+        }
+        renderPlayers(state.players);
+
+        // Recalculate vote counts
+        const aCount = state.players.filter(p => !p.isSpectator && !p.isAdmin && p.vote === 'A').length;
+        const bCount = state.players.filter(p => !p.isSpectator && !p.isAdmin && p.vote === 'B').length;
+        updateVoteBars(aCount, bCount);
+        setVoteButtons();
+      } else if (state.status === 'finished') {
+        showScreen('Finished');
+        renderSurvivors(state.players);
+        resultOverlay.classList.remove('show');
+      }
+    });
+
+    socket.on('timerTick', ({ remaining }) => {
+      updateTimerCircle(remaining, roundDuration);
+    });
+
+    socket.on('voteCounts', ({ aCount, bCount }) => {
+      updateVoteBars(aCount, bCount);
+    });
+
+    socket.on('roundEnd', ({ results, roundIndex }) => {
+      const { aCount, bCount, winner, adminUsed } = results;
+      resultCountA.textContent = aCount;
+      resultCountB.textContent = bCount;
+
+      if (winner === null) {
+        resultIcon.textContent = '🤝';
+        resultTitle.textContent = 'Perfect Tie!';
+        resultSub.textContent = 'It\'s a tie – everyone survives this round.';
+      } else if (winner === 'A') {
+        resultIcon.textContent = '🟣';
+        resultTitle.textContent = 'Option A Wins!';
+        resultSub.textContent = 'Players who voted B are eliminated.';
+      } else {
+        resultIcon.textContent = '🔵';
+        resultTitle.textContent = 'Option B Wins!';
+        resultSub.textContent = 'Players who voted A are eliminated.';
+      }
+
+      adminUsedNote.style.display = adminUsed ? 'block' : 'none';
+
+      // My result
+      myResultBanner.style.display = 'none';
+      if (!amSpectator && myVote !== null) {
+        const survived = winner === null || myVote === winner;
+        myResultBanner.style.display = 'block';
+        myResultBanner.className = 'my-result-banner ' + (survived ? 'my-result-survived' : 'my-result-eliminated');
+        myResultBanner.textContent = survived
+          ? '✅ You survived this round!'
+          : '💀 You\'ve been eliminated.';
+        if (!survived) amSpectator = true;
+      }
+
+      myVote = null;
+
+      resultOverlay.classList.add('show');
+
+      // Progress bar countdown (5s)
+      overlayProgressFill.style.transition = 'none';
+      overlayProgressFill.style.width = '100%';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          overlayProgressFill.style.transition = 'width 5s linear';
+          overlayProgressFill.style.width = '0%';
+        });
+      });
+
+      setTimeout(() => {
+        resultOverlay.classList.remove('show');
+        updateStatusBadge();
+        setVoteButtons();
+      }, 5000);
+    });
+
+    // Vote handlers
+    btnA.addEventListener('click', () => {
+      if (amSpectator || myVote !== null) return;
+      myVote = 'A';
+      socket.emit('vote', { option: 'A' });
+      setVoteButtons();
+    });
+
+    btnB.addEventListener('click', () => {
+      if (amSpectator || myVote !== null) return;
+      myVote = 'B';
+      socket.emit('vote', { option: 'B' });
+      setVoteButtons();
+    });
+
+    // Join on connect
+    socket.on('connect', () => {
+      socket.emit('join', { nickname });
+    });
+
+    socket.on('joined', ({ isSpectator }) => {
+      amSpectator = isSpectator;
+      sessionStorage.setItem('isSpectator', isSpectator ? 'true' : 'false');
+      updateStatusBadge();
+    });
+
+    updateStatusBadge();
+  </script>
+</body>
+</html>
