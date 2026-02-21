@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Balance Game – Play</title>
+  <title>밸런스 게임 – 플레이</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -215,6 +215,7 @@
       transition: all 0.2s;
       text-align: center;
       overflow: hidden;
+      color: var(--text);
     }
 
     .vote-btn:hover:not(:disabled) {
@@ -542,7 +543,7 @@
 
   <!-- Top bar -->
   <div class="topbar">
-    <span class="game-title">⚖️ Balance</span>
+    <span class="game-title">⚖️ 밸런스</span>
     <div class="topbar-right">
       <span class="badge badge-online">
         <span class="dot"></span>
@@ -552,21 +553,21 @@
     </div>
   </div>
 
-  <!-- Waiting screen -->
+  <!-- 대기 화면 -->
   <div class="screen active" id="screenWaiting">
     <div class="waiting-box">
       <div class="big-emoji">⏳</div>
-      <h2>Waiting for Host</h2>
-      <p>The game hasn't started yet. Hang tight!</p>
+      <h2>호스트 대기 중</h2>
+      <p>게임이 아직 시작되지 않았습니다. 잠시만 기다려주세요!</p>
       <div class="spinner"></div>
     </div>
   </div>
 
-  <!-- Playing screen -->
+  <!-- 진행 화면 -->
   <div class="screen" id="screenPlaying">
     <div class="round-header">
-      <div class="round-label" id="roundLabel">Round 1</div>
-      <div class="round-topic" id="roundTopic">Loading…</div>
+      <div class="round-label" id="roundLabel">라운드 1</div>
+      <div class="round-topic" id="roundTopic">불러오는 중…</div>
       <div class="timer-row">
         <div class="timer-circle" id="timerCircle" style="--progress: 100%">
           <span class="timer-num" id="timerNum">–</span>
@@ -575,7 +576,7 @@
     </div>
 
     <div class="vote-counts-row">
-      <div class="vote-counts-label">Live Vote Counts</div>
+      <div class="vote-counts-label">실시간 투표 현황</div>
       <div class="vote-bar-wrap">
         <span class="count-a" id="countA">0</span>
         <div class="vote-bar-track">
@@ -591,53 +592,53 @@
     <div class="vote-grid">
       <button class="vote-btn vote-a" id="btnA">
         <span class="vote-letter">A</span>
-        <span class="vote-option-text" id="optionAText">Option A</span>
-        <div class="spectator-overlay" id="overlayA" style="display:none">👁 Spectator</div>
+        <span class="vote-option-text" id="optionAText">A안</span>
+        <div class="spectator-overlay" id="overlayA" style="display:none">👁 관전자</div>
       </button>
       <button class="vote-btn vote-b" id="btnB">
         <span class="vote-letter">B</span>
-        <span class="vote-option-text" id="optionBText">Option B</span>
-        <div class="spectator-overlay" id="overlayB" style="display:none">👁 Spectator</div>
+        <span class="vote-option-text" id="optionBText">B안</span>
+        <div class="spectator-overlay" id="overlayB" style="display:none">👁 관전자</div>
       </button>
     </div>
 
     <div class="players-strip">
-      <div class="players-strip-label">Players</div>
+      <div class="players-strip-label">참가자</div>
       <div class="players-list" id="playersList"></div>
     </div>
   </div>
 
-  <!-- Finished screen -->
+  <!-- 종료 화면 -->
   <div class="screen" id="screenFinished">
     <div class="finished-box">
       <div class="big-emoji">🏆</div>
-      <h2>Game Over!</h2>
-      <p>The game has ended. Thanks for playing!</p>
+      <h2>게임 종료!</h2>
+      <p>게임이 종료되었습니다. 참여해 주셔서 감사합니다!</p>
       <div class="survivors-list" id="survivorsList"></div>
       <div style="margin-top:32px">
-        <a href="/" style="color:var(--purple);text-decoration:none;font-weight:600">← Play Again</a>
+        <a href="/" style="color:var(--purple);text-decoration:none;font-weight:600">← 다시 플레이</a>
       </div>
     </div>
   </div>
 
-  <!-- Round result overlay -->
+  <!-- 라운드 결과 오버레이 -->
   <div class="overlay" id="resultOverlay">
     <div class="overlay-card">
       <div class="result-icon" id="resultIcon">⚖️</div>
-      <div class="result-title" id="resultTitle">Round Over</div>
+      <div class="result-title" id="resultTitle">라운드 종료</div>
       <div class="result-sub" id="resultSub"></div>
       <div class="result-counts">
         <div class="result-count-item side-a">
           <div class="result-count-num" id="resultCountA">0</div>
-          <div class="result-count-label">Voted A</div>
+          <div class="result-count-label">A안 투표</div>
         </div>
         <div class="result-count-item side-b">
           <div class="result-count-num" id="resultCountB">0</div>
-          <div class="result-count-label">Voted B</div>
+          <div class="result-count-label">B안 투표</div>
         </div>
       </div>
       <div class="admin-used-note" id="adminUsedNote" style="display:none">
-        🗳️ Admin tiebreaker was used!
+        🗳️ 관리자 결정표가 사용되었습니다!
       </div>
       <div class="my-result-banner" id="myResultBanner" style="display:none"></div>
       <div class="overlay-progress">
@@ -699,10 +700,10 @@
     function updateStatusBadge() {
       if (amSpectator) {
         statusBadge.className = 'badge badge-spectator';
-        statusBadge.textContent = '👁 Spectator';
+        statusBadge.textContent = '👁 관전자';
       } else {
         statusBadge.className = 'badge badge-alive';
-        statusBadge.textContent = '💚 Alive';
+        statusBadge.textContent = '💚 생존';
       }
     }
 
@@ -730,7 +731,7 @@
         const chip = document.createElement('span');
         chip.className = 'player-chip ' + (p.isSpectator ? 'spectator' : 'alive') + (p.connected ? '' : ' offline');
         chip.textContent = (p.isSpectator ? '💀 ' : '💚 ') + p.nickname;
-        if (!p.connected) { chip.title = 'Disconnected'; }
+        if (!p.connected) { chip.title = '연결 끊김'; }
         playersList.appendChild(chip);
       });
     }
@@ -738,11 +739,17 @@
     function renderSurvivors(players) {
       survivorsList.innerHTML = '';
       const alive = players.filter(p => !p.isSpectator && !p.isAdmin);
-      if (alive.length === 0) {
-        survivorsList.innerHTML = '<p style="color:var(--muted)">No survivors 😢</p>';
+      const seen = new Set();
+      const unique = alive.filter(p => {
+        if (seen.has(p.nickname)) return false;
+        seen.add(p.nickname);
+        return true;
+      });
+      if (unique.length === 0) {
+        survivorsList.innerHTML = '<p style="color:var(--muted)">생존자 없음 😢</p>';
         return;
       }
-      alive.forEach(p => {
+      unique.forEach(p => {
         const chip = document.createElement('span');
         chip.className = 'survivor-chip';
         chip.textContent = '🏆 ' + p.nickname;
@@ -763,7 +770,7 @@
 
     // Handle incoming game state
     socket.on('gameState', (state) => {
-      onlineCountEl.textContent = state.onlineCount + ' online';
+      onlineCountEl.textContent = state.onlineCount + ' 명 온라인';
       gameRounds = state.rounds || [];
 
       // Sync my spectator status
@@ -780,7 +787,7 @@
         if (round) {
           currentRoundIdx = state.currentRound;
           roundDuration = round.durationSeconds;
-          roundLabel.textContent = `Round ${state.currentRound + 1} of ${state.rounds.length}`;
+          roundLabel.textContent = `라운드 ${state.currentRound + 1} / ${state.rounds.length}`;
           roundTopic.textContent = round.topic;
           optionAText.textContent = round.optionA;
           optionBText.textContent = round.optionB;
@@ -815,16 +822,16 @@
 
       if (winner === null) {
         resultIcon.textContent = '🤝';
-        resultTitle.textContent = 'Perfect Tie!';
-        resultSub.textContent = 'It\'s a tie – everyone survives this round.';
+        resultTitle.textContent = '완전 동점!';
+        resultSub.textContent = '동점입니다 – 이번 라운드는 모두 생존합니다.';
       } else if (winner === 'A') {
         resultIcon.textContent = '🟣';
-        resultTitle.textContent = 'Option A Wins!';
-        resultSub.textContent = 'Players who voted B are eliminated.';
+        resultTitle.textContent = 'A안 승리!';
+        resultSub.textContent = 'B안을 선택한 플레이어가 탈락합니다.';
       } else {
         resultIcon.textContent = '🔵';
-        resultTitle.textContent = 'Option B Wins!';
-        resultSub.textContent = 'Players who voted A are eliminated.';
+        resultTitle.textContent = 'B안 승리!';
+        resultSub.textContent = 'A안을 선택한 플레이어가 탈락합니다.';
       }
 
       adminUsedNote.style.display = adminUsed ? 'block' : 'none';
@@ -836,8 +843,8 @@
         myResultBanner.style.display = 'block';
         myResultBanner.className = 'my-result-banner ' + (survived ? 'my-result-survived' : 'my-result-eliminated');
         myResultBanner.textContent = survived
-          ? '✅ You survived this round!'
-          : '💀 You\'ve been eliminated.';
+          ? '✅ 이번 라운드에서 살아남았습니다!'
+          : '💀 탈락하였습니다.';
         if (!survived) amSpectator = true;
       }
 

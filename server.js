@@ -227,7 +227,7 @@ io.on('connection', (socket) => {
       socket.emit('adminLoggedIn');
       broadcastGameState(false);
     } else {
-      socket.emit('adminLoginFailed', { message: 'Invalid password' });
+      socket.emit('adminLoginFailed', { message: '잘못된 비밀번호' });
     }
   });
 

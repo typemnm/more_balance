@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Balance Game</title>
+  <title>밸런스 게임</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -261,52 +261,52 @@
 <body>
   <div class="container">
     <div class="logo">
-      <h1>⚖️ Balance Game</h1>
-      <p>Pick a side. Stay alive.</p>
+      <h1>⚖️ 밸런스 게임</h1>
+      <p>한 쪽을 선택하세요. 살아남으세요.</p>
     </div>
 
     <div class="card">
       <h2>
-        Join the Game
+        게임 참가
         <span class="online-badge" id="onlineCount">
           <span class="dot"></span>
-          <span id="countNum">–</span> online
+          <span id="countNum">–</span> 명 온라인
         </span>
       </h2>
 
       <div class="rejoin-banner" id="rejoinBanner">
-        <p>Welcome back, <span class="rejoin-name" id="rejoinName"></span>! Want to rejoin?</p>
-        <button class="btn-rejoin" id="btnRejoin">Rejoin Game</button>
-        <button class="btn-new-session" id="btnNewSession">New Session</button>
+        <p>다시 오셨군요, <span class="rejoin-name" id="rejoinName"></span>님! 재참가하시겠어요?</p>
+        <button class="btn-rejoin" id="btnRejoin">게임 재참가</button>
+        <button class="btn-new-session" id="btnNewSession">새 세션</button>
       </div>
 
       <div class="notice info" id="spectatorNotice">
-        ⚡ The game is in progress — you'll join as a <strong>spectator</strong>.
+        ⚡ 게임이 진행 중입니다 — <strong>관전자</strong>로 참가합니다.
       </div>
 
       <div class="notice warning" id="waitingNotice">
-        ⏳ Waiting for the host to start the game.
+        ⏳ 호스트가 게임을 시작하기를 기다리는 중입니다.
       </div>
 
       <div class="notice error" id="errorNotice"></div>
 
       <div class="form-group">
-        <label for="nickname">Your Nickname</label>
+        <label for="nickname">닉네임</label>
         <input
           type="text"
           id="nickname"
-          placeholder="Enter a nickname..."
+          placeholder="닉네임을 입력하세요..."
           maxlength="24"
           autocomplete="off"
           autofocus
         />
       </div>
 
-      <button class="btn btn-primary" id="btnJoin">Join Game</button>
+      <button class="btn btn-primary" id="btnJoin">게임 참가</button>
 
       <hr class="divider" />
 
-      <a href="/admin.html" class="btn btn-secondary">🔐 Admin Dashboard</a>
+      <a href="/admin.html" class="btn btn-secondary">🔐 관리자 대시보드</a>
     </div>
   </div>
 
@@ -371,12 +371,12 @@
     function joinGame(name) {
       name = (name || '').trim();
       if (!name) {
-        showError('Please enter a nickname.');
+        showError('닉네임을 입력해주세요.');
         nicknameInput.focus();
         return;
       }
       hideError();
-      btnJoin.textContent = 'Joining…';
+      btnJoin.textContent = '참가 중…';
       btnJoin.disabled = true;
       socket.emit('join', { nickname: name });
     }
