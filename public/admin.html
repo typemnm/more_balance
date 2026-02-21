@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Balance Game – Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f1a;
+      --card: #1a1a2e;
+      --card2: #16162b;
+      --border: #2a2a4a;
+      --text: #e0e0f0;
+      --muted: #6b7280;
+      --purple: #a855f7;
+      --blue: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── Login screen ── */
+    #loginScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    .login-card h1 {
+      font-size: 1.7rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .login-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    input[type="password"], input[type="text"], input[type="number"], select, textarea {
+      width: 100%;
+      padding: 11px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px rgba(168,85,247,0.12);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 20px;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+
+    .btn-full { display: flex; width: 100%; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(168,85,247,0.28);
+    }
+
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(168,85,247,0.4); }
+    .btn-primary:active { transform: none; }
+
+    .btn-secondary {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: #c4b5fd;
+    }
+
+    .btn-secondary:hover { border-color: var(--purple); background: rgba(168,85,247,0.06); }
+
+    .btn-success {
+      background: rgba(34,197,94,0.14);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #86efac;
+    }
+
+    .btn-success:hover { background: rgba(34,197,94,0.22); }
+
+    .btn-danger {
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+    }
+
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+
+    .btn-warning {
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.3);
+      color: #fcd34d;
+    }
+
+    .btn-warning:hover { background: rgba(245,158,11,0.2); }
+
+    .btn-blue {
+      background: rgba(59,130,246,0.13);
+      border: 1px solid rgba(59,130,246,0.3);
+      color: #93c5fd;
+    }
+
+    .btn-blue:hover { background: rgba(59,130,246,0.22); }
+
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+    .notice-error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+      font-size: 0.85rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-top: 14px;
+      display: none;
+    }
+
+    /* ── Admin panel ── */
+    #adminPanel { display: none; }
+
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 0;
+      min-height: 100vh;
+    }
+
+    .admin-main {
+      padding: 24px;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+    }
+
+    .admin-sidebar {
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .admin-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .admin-header h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--purple);
+      margin-bottom: 16px;
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .chip-status-waiting  { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); color: #fcd34d; }
+    .chip-status-playing  { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.25);  color: #86efac; }
+    .chip-status-finished { background: rgba(107,114,128,0.1);border: 1px solid rgba(107,114,128,0.2); color: #9ca3af; }
+
+    .chip-online {
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2);
+      color: #93c5fd;
+    }
+
+    .dot { width:7px; height:7px; border-radius:50%; background:currentColor; animation:pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    /* ── Round builder ── */
+    .round-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+
+    .round-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .round-num {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--purple);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .round-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .round-fields .full { grid-column: 1 / -1; }
+
+    .field-group { display: flex; flex-direction: column; gap: 5px; }
+    .field-group label { margin-bottom: 0; font-size: 0.75rem; }
+
+    /* ── Control buttons ── */
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Admin vote ── */
+    .admin-vote-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .admin-vote-btn {
+      flex: 1;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+      border: 2px solid transparent;
+    }
+
+    .admin-vote-a {
+      background: rgba(168,85,247,0.1);
+      border-color: rgba(168,85,247,0.3);
+      color: #c084fc;
+    }
+
+    .admin-vote-a:hover, .admin-vote-a.active {
+      background: rgba(168,85,247,0.2);
+      border-color: var(--purple);
+    }
+
+    .admin-vote-b {
+      background: rgba(59,130,246,0.1);
+      border-color: rgba(59,130,246,0.3);
+      color: #60a5fa;
+    }
+
+    .admin-vote-b:hover, .admin-vote-b.active {
+      background: rgba(59,130,246,0.2);
+      border-color: var(--blue);
+    }
+
+    .admin-vote-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* ── Players table ── */
+    .players-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .players-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .players-table td {
+      padding: 8px 8px;
+      font-size: 0.85rem;
+      border-bottom: 1px solid rgba(42,42,74,0.5);
+      vertical-align: middle;
+    }
+
+    .players-table tr:last-child td { border-bottom: none; }
+
+    .status-pill {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .pill-alive     { background: rgba(34,197,94,0.1);  border: 1px solid rgba(34,197,94,0.25);  color: #86efac; }
+    .pill-spectator { background: rgba(107,114,128,0.1);border: 1px solid rgba(107,114,128,0.2); color: #9ca3af; }
+    .pill-admin     { background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.25); color: #c4b5fd; }
+    .pill-offline   { opacity: 0.5; }
+
+    /* ── Vote counts ── */
+    .big-counts {
+      display: flex;
+      gap: 14px;
+    }
+
+    .big-count-box {
+      flex: 1;
+      padding: 16px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .box-a { background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.2); }
+    .box-b { background: rgba(59,130,246,0.08);  border: 1px solid rgba(59,130,246,0.2); }
+
+    .big-count-num  { font-size: 2.4rem; font-weight: 900; }
+    .box-a .big-count-num { color: #c084fc; }
+    .box-b .big-count-num { color: #60a5fa; }
+    .big-count-label { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Timer ── */
+    .timer-display {
+      font-size: 2.8rem;
+      font-weight: 900;
+      text-align: center;
+      color: var(--text);
+      padding: 10px 0;
+    }
+
+    .timer-urgent { color: var(--red); }
+
+    /* ── Scrollable area ── */
+    .rounds-container { max-height: 500px; overflow-y: auto; padding-right: 4px; }
+    .rounds-container::-webkit-scrollbar { width: 4px; }
+    .rounds-container::-webkit-scrollbar-track { background: transparent; }
+    .rounds-container::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px 0;
+      font-size: 0.9rem;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e1e35;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      z-index: 200;
+      display: none;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity:0; }
+      to   { transform: translateY(0);    opacity:1; }
+    }
+
+    @media (max-width: 900px) {
+      .admin-layout { grid-template-columns: 1fr; }
+      .admin-sidebar { border-top: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login screen -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <h1>🔐 Admin Panel</h1>
+      <p>Enter your password to access the admin dashboard.</p>
+      <div class="field-group" style="margin-bottom:16px">
+        <label for="adminPassword">Admin Password</label>
+        <input type="password" id="adminPassword" placeholder="Password…" autofocus />
+      </div>
+      <button class="btn btn-primary btn-full" id="btnLogin">Login</button>
+      <div class="notice-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- Admin panel -->
+  <div id="adminPanel">
+    <div class="admin-layout">
+
+      <!-- Main column -->
+      <div class="admin-main">
+        <div class="admin-header">
+          <h1>⚖️ Admin Dashboard</h1>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span class="status-chip chip-online">
+              <span class="dot"></span>
+              <span id="onlineCount">–</span> online
+            </span>
+            <span class="status-chip" id="statusChip">–</span>
+          </div>
+        </div>
+
+        <!-- Game controls -->
+        <div class="section">
+          <div class="section-title">Game Controls</div>
+          <div class="control-row">
+            <button class="btn btn-success" id="btnStartGame">▶ Start Game</button>
+            <button class="btn btn-blue" id="btnNextRound">⏭ Skip Round</button>
+            <button class="btn btn-danger" id="btnResetGame">↺ Reset Game</button>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <div>
+              <span style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Current Round</span>
+              <div style="font-size:1.1rem;font-weight:700;margin-top:2px" id="currentRoundInfo">–</div>
+            </div>
+            <div>
+              <span style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Timer</span>
+              <div class="timer-display" id="timerDisplay">–</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin vote -->
+        <div class="section">
+          <div class="section-title">Admin Tiebreaker Vote</div>
+          <div class="admin-vote-row">
+            <button class="admin-vote-btn admin-vote-a" id="btnAdminVoteA">🟣 Vote A</button>
+            <button class="admin-vote-btn admin-vote-b" id="btnAdminVoteB">🔵 Vote B</button>
+          </div>
+          <div class="admin-vote-note" id="adminVoteStatus">No tiebreaker vote set this round.</div>
+        </div>
+
+        <!-- Live vote counts -->
+        <div class="section">
+          <div class="section-title">Live Vote Counts</div>
+          <div class="big-counts">
+            <div class="big-count-box box-a">
+              <div class="big-count-num" id="adminCountA">0</div>
+              <div class="big-count-label">Voted A</div>
+            </div>
+            <div class="big-count-box box-b">
+              <div class="big-count-num" id="adminCountB">0</div>
+              <div class="big-count-label">Voted B</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Round builder -->
+        <div class="section">
+          <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Round Builder</span>
+            <button class="btn btn-secondary btn-sm" id="btnAddRound">+ Add Round</button>
+          </div>
+          <div class="rounds-container" id="roundsContainer">
+            <div class="empty-state" id="emptyRounds">No rounds yet. Add a round to get started.</div>
+          </div>
+          <div style="margin-top:14px">
+            <button class="btn btn-primary" id="btnCreateGame">💾 Save & Create Game</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="admin-sidebar">
+        <!-- Players table -->
+        <div class="section">
+          <div class="section-title">Players (<span id="playerCountLabel">0</span>)</div>
+          <div id="playersTableWrap">
+            <div class="empty-state">No players yet.</div>
+          </div>
+        </div>
+
+        <!-- Round info -->
+        <div class="section">
+          <div class="section-title">Current Round</div>
+          <div id="roundInfoBox">
+            <div class="empty-state">No round in progress.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // ── State ──
+    let roundDefs = [];       // [{topic, optionA, optionB, durationSeconds}]
+    let adminVoteCurrent = null;
+    let timerInterval = null;
+    let timerRemaining = 0;
+    let roundDuration = 60;
+
+    // ── DOM refs ──
+    const loginScreen    = document.getElementById('loginScreen');
+    const adminPanel     = document.getElementById('adminPanel');
+    const adminPassword  = document.getElementById('adminPassword');
+    const btnLogin       = document.getElementById('btnLogin');
+    const loginError     = document.getElementById('loginError');
+
+    const onlineCountEl  = document.getElementById('onlineCount');
+    const statusChip     = document.getElementById('statusChip');
+    const currentRoundInfo = document.getElementById('currentRoundInfo');
+    const timerDisplay   = document.getElementById('timerDisplay');
+
+    const btnStartGame   = document.getElementById('btnStartGame');
+    const btnNextRound   = document.getElementById('btnNextRound');
+    const btnResetGame   = document.getElementById('btnResetGame');
+    const btnAdminVoteA  = document.getElementById('btnAdminVoteA');
+    const btnAdminVoteB  = document.getElementById('btnAdminVoteB');
+    const adminVoteStatus= document.getElementById('adminVoteStatus');
+    const adminCountA    = document.getElementById('adminCountA');
+    const adminCountB    = document.getElementById('adminCountB');
+
+    const btnAddRound    = document.getElementById('btnAddRound');
+    const roundsContainer= document.getElementById('roundsContainer');
+    const emptyRounds    = document.getElementById('emptyRounds');
+    const btnCreateGame  = document.getElementById('btnCreateGame');
+
+    const playersTableWrap = document.getElementById('playersTableWrap');
+    const playerCountLabel = document.getElementById('playerCountLabel');
+    const roundInfoBox   = document.getElementById('roundInfoBox');
+
+    const toast          = document.getElementById('toast');
+
+    // ── Login ──
+    function doLogin() {
+      const pw = adminPassword.value.trim();
+      if (!pw) return;
+      socket.emit('adminLogin', { password: pw });
+    }
+
+    btnLogin.addEventListener('click', doLogin);
+    adminPassword.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    socket.on('adminLoggedIn', () => {
+      loginScreen.style.display = 'none';
+      adminPanel.style.display = 'block';
+      showToast('✅ Logged in as admin');
+    });
+
+    socket.on('adminLoginFailed', ({ message }) => {
+      loginError.textContent = '❌ ' + message;
+      loginError.style.display = 'block';
+    });
+
+    // ── Toast ──
+    let toastTimeout;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 2800);
+    }
+
+    // ── Game state ──
+    socket.on('gameState', (state) => {
+      onlineCountEl.textContent = state.onlineCount;
+      updateStatusChip(state.status);
+
+      const round = state.currentRound >= 0 ? state.rounds[state.currentRound] : null;
+
+      if (state.status === 'playing' && round) {
+        currentRoundInfo.textContent = `Round ${state.currentRound + 1} / ${state.rounds.length}: ${round.topic}`;
+        roundDuration = round.durationSeconds;
+        timerRemaining = state.timerRemaining;
+        updateTimerDisplay();
+        renderRoundInfo(round, state.currentRound, state.rounds.length);
+      } else {
+        currentRoundInfo.textContent = '–';
+        timerDisplay.textContent = '–';
+        timerDisplay.className = 'timer-display';
+        roundInfoBox.innerHTML = '<div class="empty-state">No round in progress.</div>';
+      }
+
+      renderPlayers(state.players);
+
+      // Recalculate live vote counts from player list
+      const aCount = state.players.filter(p => !p.isSpectator && !p.isAdmin && p.vote === 'A').length;
+      const bCount = state.players.filter(p => !p.isSpectator && !p.isAdmin && p.vote === 'B').length;
+      adminCountA.textContent = aCount;
+      adminCountB.textContent = bCount;
+
+      // Control states
+      btnStartGame.disabled = !(state.status === 'waiting' && state.rounds.length > 0);
+      btnNextRound.disabled = state.status !== 'playing';
+      btnAdminVoteA.disabled = state.status !== 'playing';
+      btnAdminVoteB.disabled = state.status !== 'playing';
+    });
+
+    socket.on('timerTick', ({ remaining }) => {
+      timerRemaining = remaining;
+      updateTimerDisplay();
+    });
+
+    socket.on('voteCounts', ({ aCount, bCount }) => {
+      adminCountA.textContent = aCount;
+      adminCountB.textContent = bCount;
+    });
+
+    socket.on('roundEnd', ({ results, roundIndex }) => {
+      showToast(`Round ${roundIndex + 1} ended. Winner: ${results.winner || 'Tie'}`);
+      adminVoteCurrent = null;
+      updateAdminVoteUI();
+    });
+
+    socket.on('adminVoteRecorded', ({ option }) => {
+      adminVoteCurrent = option;
+      updateAdminVoteUI();
+      showToast(`Admin tiebreaker vote set to ${option}`);
+    });
+
+    function updateStatusChip(status) {
+      const map = {
+        waiting:  ['chip-status-waiting',  '⏳ Waiting'],
+        playing:  ['chip-status-playing',  '▶ Playing'],
+        finished: ['chip-status-finished', '✅ Finished'],
+      };
+      const [cls, label] = map[status] || ['chip-status-waiting', status];
+      statusChip.className = 'status-chip ' + cls;
+      statusChip.textContent = label;
+    }
+
+    function updateTimerDisplay() {
+      timerDisplay.textContent = timerRemaining;
+      timerDisplay.className = 'timer-display' + (timerRemaining <= 10 ? ' timer-urgent' : '');
+    }
+
+    function updateAdminVoteUI() {
+      btnAdminVoteA.classList.toggle('active', adminVoteCurrent === 'A');
+      btnAdminVoteB.classList.toggle('active', adminVoteCurrent === 'B');
+      adminVoteStatus.textContent = adminVoteCurrent
+        ? `Tiebreaker vote set to: Option ${adminVoteCurrent}`
+        : 'No tiebreaker vote set this round.';
+    }
+
+    function renderPlayers(players) {
+      const nonAdmin = players.filter(p => !p.isAdmin);
+      playerCountLabel.textContent = nonAdmin.length;
+      if (nonAdmin.length === 0) {
+        playersTableWrap.innerHTML = '<div class="empty-state">No players yet.</div>';
+        return;
+      }
+      const rows = players.map(p => {
+        let pillClass = p.isAdmin ? 'pill-admin' : p.isSpectator ? 'pill-spectator' : 'pill-alive';
+        let pillText  = p.isAdmin ? '👑 Admin' : p.isSpectator ? '💀 Spectator' : '💚 Alive';
+        const connectedBadge = p.connected
+          ? '<span style="color:#86efac;font-size:.75rem">● online</span>'
+          : '<span style="color:#6b7280;font-size:.75rem">○ offline</span>';
+        const voteCell = p.vote
+          ? `<span style="font-weight:700;color:${p.vote==='A'?'#c084fc':'#60a5fa'}">${p.vote}</span>`
+          : '<span style="color:var(--muted)">–</span>';
+        return `<tr class="${p.connected ? '' : 'pill-offline'}">
+          <td>${p.nickname}</td>
+          <td><span class="status-pill ${pillClass}">${pillText}</span></td>
+          <td>${connectedBadge}</td>
+          <td>${voteCell}</td>
+        </tr>`;
+      }).join('');
+      playersTableWrap.innerHTML = `
+        <table class="players-table">
+          <thead><tr>
+            <th>Name</th><th>Status</th><th>Conn.</th><th>Vote</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    function renderRoundInfo(round, idx, total) {
+      roundInfoBox.innerHTML = `
+        <div style="margin-bottom:10px">
+          <div style="font-size:.75rem;color:var(--muted);margin-bottom:3px">Topic</div>
+          <div style="font-weight:600">${round.topic}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.2);border-radius:8px;padding:10px">
+            <div style="font-size:.7rem;color:#c084fc;font-weight:700;margin-bottom:3px">OPTION A</div>
+            <div style="font-size:.9rem">${round.optionA}</div>
+          </div>
+          <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px">
+            <div style="font-size:.7rem;color:#60a5fa;font-weight:700;margin-bottom:3px">OPTION B</div>
+            <div style="font-size:.9rem">${round.optionB}</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:.78rem;color:var(--muted)">
+          Round ${idx + 1} of ${total} · ${round.durationSeconds}s duration
+        </div>`;
+    }
+
+    // ── Round builder ──
+    function addRoundDef(data) {
+      roundDefs.push(data || { topic: '', optionA: '', optionB: '', durationSeconds: 60 });
+      renderRoundBuilder();
+    }
+
+    function removeRoundDef(idx) {
+      roundDefs.splice(idx, 1);
+      renderRoundBuilder();
+    }
+
+    function getRoundFieldValue(idx, field) {
+      const el = document.getElementById(`round_${idx}_${field}`);
+      return el ? el.value : '';
+    }
+
+    function syncRoundDefs() {
+      roundDefs = roundDefs.map((_, idx) => ({
+        topic: getRoundFieldValue(idx, 'topic'),
+        optionA: getRoundFieldValue(idx, 'optionA'),
+        optionB: getRoundFieldValue(idx, 'optionB'),
+        durationSeconds: parseInt(getRoundFieldValue(idx, 'duration')) || 60,
+      }));
+    }
+
+    function renderRoundBuilder() {
+      if (roundDefs.length === 0) {
+        emptyRounds.style.display = 'block';
+        roundsContainer.querySelectorAll('.round-item').forEach(el => el.remove());
+        return;
+      }
+      emptyRounds.style.display = 'none';
+      roundsContainer.querySelectorAll('.round-item').forEach(el => el.remove());
+      roundDefs.forEach((r, idx) => {
+        const div = document.createElement('div');
+        div.className = 'round-item';
+        div.innerHTML = `
+          <div class="round-item-header">
+            <span class="round-num">Round ${idx + 1}</span>
+            <button class="btn btn-danger btn-sm" onclick="syncRoundDefs();removeRoundDef(${idx})">✕ Remove</button>
+          </div>
+          <div class="round-fields">
+            <div class="field-group full">
+              <label>Topic / Question</label>
+              <input type="text" id="round_${idx}_topic" placeholder="e.g. Which is better?" value="${escHtml(r.topic)}" />
+            </div>
+            <div class="field-group">
+              <label>Option A</label>
+              <input type="text" id="round_${idx}_optionA" placeholder="Option A text" value="${escHtml(r.optionA)}" />
+            </div>
+            <div class="field-group">
+              <label>Option B</label>
+              <input type="text" id="round_${idx}_optionB" placeholder="Option B text" value="${escHtml(r.optionB)}" />
+            </div>
+            <div class="field-group">
+              <label>Duration (seconds)</label>
+              <input type="number" id="round_${idx}_duration" min="5" max="300" value="${r.durationSeconds}" />
+            </div>
+          </div>`;
+        roundsContainer.appendChild(div);
+      });
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    btnAddRound.addEventListener('click', () => {
+      syncRoundDefs();
+      addRoundDef();
+    });
+
+    btnCreateGame.addEventListener('click', () => {
+      syncRoundDefs();
+      const valid = roundDefs.filter(r => r.topic.trim() && r.optionA.trim() && r.optionB.trim());
+      if (valid.length === 0) {
+        showToast('⚠️ Add at least one complete round first.');
+        return;
+      }
+      socket.emit('createGame', { rounds: valid });
+      showToast('✅ Game saved! ' + valid.length + ' round(s) created.');
+    });
+
+    // ── Controls ──
+    btnStartGame.addEventListener('click', () => {
+      socket.emit('startGame');
+      showToast('▶ Game started!');
+    });
+
+    btnNextRound.addEventListener('click', () => {
+      socket.emit('nextRound');
+      showToast('⏭ Skipping to next round…');
+    });
+
+    btnResetGame.addEventListener('click', () => {
+      if (!confirm('Reset the game? This will clear all rounds and reset all players.')) return;
+      socket.emit('resetGame');
+      roundDefs = [];
+      renderRoundBuilder();
+      adminVoteCurrent = null;
+      updateAdminVoteUI();
+      showToast('↺ Game reset.');
+    });
+
+    btnAdminVoteA.addEventListener('click', () => {
+      socket.emit('adminVote', { option: 'A' });
+    });
+
+    btnAdminVoteB.addEventListener('click', () => {
+      socket.emit('adminVote', { option: 'B' });
+    });
+
+    // ── Pre-load some example rounds ──
+    [
+      { topic: 'What tastes better?', optionA: 'Pizza', optionB: 'Tacos', durationSeconds: 30 },
+      { topic: 'Better travel option?', optionA: 'Beach vacation', optionB: 'Mountain retreat', durationSeconds: 30 },
+      { topic: 'Best way to spend a free afternoon?', optionA: 'Read a book', optionB: 'Watch a movie', durationSeconds: 30 },
+    ].forEach(r => roundDefs.push(r));
+    renderRoundBuilder();
+  </script>
+</body>
+</html>
