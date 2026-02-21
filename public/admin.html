@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Balance Game – Admin</title>
+  <title>밸런스 게임 – 관리자</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -465,16 +465,16 @@
 </head>
 <body>
 
-  <!-- Login screen -->
+  <!-- 로그인 화면 -->
   <div id="loginScreen">
     <div class="login-card">
-      <h1>🔐 Admin Panel</h1>
-      <p>Enter your password to access the admin dashboard.</p>
+      <h1>🔐 관리자 패널</h1>
+      <p>관리자 대시보드에 접근하려면 비밀번호를 입력하세요.</p>
       <div class="field-group" style="margin-bottom:16px">
-        <label for="adminPassword">Admin Password</label>
-        <input type="password" id="adminPassword" placeholder="Password…" autofocus />
+        <label for="adminPassword">관리자 비밀번호</label>
+        <input type="password" id="adminPassword" placeholder="비밀번호..." autofocus />
       </div>
-      <button class="btn btn-primary btn-full" id="btnLogin">Login</button>
+      <button class="btn btn-primary btn-full" id="btnLogin">로그인</button>
       <div class="notice-error" id="loginError"></div>
     </div>
   </div>
@@ -486,91 +486,91 @@
       <!-- Main column -->
       <div class="admin-main">
         <div class="admin-header">
-          <h1>⚖️ Admin Dashboard</h1>
+          <h1>⚖️ 관리자 대시보드</h1>
           <div style="display:flex;gap:8px;align-items:center">
             <span class="status-chip chip-online">
               <span class="dot"></span>
-              <span id="onlineCount">–</span> online
+              <span id="onlineCount">–</span> 명 온라인
             </span>
             <span class="status-chip" id="statusChip">–</span>
           </div>
         </div>
 
-        <!-- Game controls -->
+        <!-- 게임 컨트롤 -->
         <div class="section">
-          <div class="section-title">Game Controls</div>
+          <div class="section-title">게임 컨트롤</div>
           <div class="control-row">
-            <button class="btn btn-success" id="btnStartGame">▶ Start Game</button>
-            <button class="btn btn-blue" id="btnNextRound">⏭ Skip Round</button>
-            <button class="btn btn-danger" id="btnResetGame">↺ Reset Game</button>
+            <button class="btn btn-success" id="btnStartGame">▶ 게임 시작</button>
+            <button class="btn btn-blue" id="btnNextRound">⏭ 라운드 건너뛰기</button>
+            <button class="btn btn-danger" id="btnResetGame">↺ 게임 초기화</button>
           </div>
           <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
             <div>
-              <span style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Current Round</span>
+              <span style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">현재 라운드</span>
               <div style="font-size:1.1rem;font-weight:700;margin-top:2px" id="currentRoundInfo">–</div>
             </div>
             <div>
-              <span style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Timer</span>
+              <span style="font-size:0.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">타이머</span>
               <div class="timer-display" id="timerDisplay">–</div>
             </div>
           </div>
         </div>
 
-        <!-- Admin vote -->
+        <!-- 관리자 결정표 -->
         <div class="section">
-          <div class="section-title">Admin Tiebreaker Vote</div>
+          <div class="section-title">관리자 결정표</div>
           <div class="admin-vote-row">
-            <button class="admin-vote-btn admin-vote-a" id="btnAdminVoteA">🟣 Vote A</button>
-            <button class="admin-vote-btn admin-vote-b" id="btnAdminVoteB">🔵 Vote B</button>
+            <button class="admin-vote-btn admin-vote-a" id="btnAdminVoteA">🟣 A안 선택</button>
+            <button class="admin-vote-btn admin-vote-b" id="btnAdminVoteB">🔵 B안 선택</button>
           </div>
-          <div class="admin-vote-note" id="adminVoteStatus">No tiebreaker vote set this round.</div>
+          <div class="admin-vote-note" id="adminVoteStatus">이번 라운드에 결정표가 설정되지 않았습니다.</div>
         </div>
 
-        <!-- Live vote counts -->
+        <!-- 실시간 투표 현황 -->
         <div class="section">
-          <div class="section-title">Live Vote Counts</div>
+          <div class="section-title">실시간 투표 현황</div>
           <div class="big-counts">
             <div class="big-count-box box-a">
               <div class="big-count-num" id="adminCountA">0</div>
-              <div class="big-count-label">Voted A</div>
+              <div class="big-count-label">A안 투표</div>
             </div>
             <div class="big-count-box box-b">
               <div class="big-count-num" id="adminCountB">0</div>
-              <div class="big-count-label">Voted B</div>
+              <div class="big-count-label">B안 투표</div>
             </div>
           </div>
         </div>
 
-        <!-- Round builder -->
+        <!-- 라운드 빌더 -->
         <div class="section">
           <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
-            <span>Round Builder</span>
-            <button class="btn btn-secondary btn-sm" id="btnAddRound">+ Add Round</button>
+            <span>라운드 빌더</span>
+            <button class="btn btn-secondary btn-sm" id="btnAddRound">+ 라운드 추가</button>
           </div>
           <div class="rounds-container" id="roundsContainer">
-            <div class="empty-state" id="emptyRounds">No rounds yet. Add a round to get started.</div>
+            <div class="empty-state" id="emptyRounds">라운드가 없습니다. 라운드를 추가해 시작하세요.</div>
           </div>
           <div style="margin-top:14px">
-            <button class="btn btn-primary" id="btnCreateGame">💾 Save & Create Game</button>
+            <button class="btn btn-primary" id="btnCreateGame">💾 저장 및 게임 생성</button>
           </div>
         </div>
       </div>
 
-      <!-- Sidebar -->
+      <!-- 사이드바 -->
       <div class="admin-sidebar">
-        <!-- Players table -->
+        <!-- 참가자 테이블 -->
         <div class="section">
-          <div class="section-title">Players (<span id="playerCountLabel">0</span>)</div>
+          <div class="section-title">참가자 (<span id="playerCountLabel">0</span>명)</div>
           <div id="playersTableWrap">
-            <div class="empty-state">No players yet.</div>
+            <div class="empty-state">참가자가 없습니다.</div>
           </div>
         </div>
 
-        <!-- Round info -->
+        <!-- 라운드 정보 -->
         <div class="section">
-          <div class="section-title">Current Round</div>
+          <div class="section-title">현재 라운드</div>
           <div id="roundInfoBox">
-            <div class="empty-state">No round in progress.</div>
+            <div class="empty-state">진행 중인 라운드가 없습니다.</div>
           </div>
         </div>
       </div>
@@ -637,7 +637,7 @@
     socket.on('adminLoggedIn', () => {
       loginScreen.style.display = 'none';
       adminPanel.style.display = 'block';
-      showToast('✅ Logged in as admin');
+      showToast('✅ 관리자로 로그인됨');
     });
 
     socket.on('adminLoginFailed', ({ message }) => {
@@ -662,7 +662,7 @@
       const round = state.currentRound >= 0 ? state.rounds[state.currentRound] : null;
 
       if (state.status === 'playing' && round) {
-        currentRoundInfo.textContent = `Round ${state.currentRound + 1} / ${state.rounds.length}: ${round.topic}`;
+        currentRoundInfo.textContent = `라운드 ${state.currentRound + 1} / ${state.rounds.length}: ${round.topic}`;
         roundDuration = round.durationSeconds;
         timerRemaining = state.timerRemaining;
         updateTimerDisplay();
@@ -671,7 +671,7 @@
         currentRoundInfo.textContent = '–';
         timerDisplay.textContent = '–';
         timerDisplay.className = 'timer-display';
-        roundInfoBox.innerHTML = '<div class="empty-state">No round in progress.</div>';
+        roundInfoBox.innerHTML = '<div class="empty-state">진행 중인 라운드가 없습니다.</div>';
       }
 
       renderPlayers(state.players);
@@ -700,7 +700,7 @@
     });
 
     socket.on('roundEnd', ({ results, roundIndex }) => {
-      showToast(`Round ${roundIndex + 1} ended. Winner: ${results.winner || 'Tie'}`);
+      showToast(`라운드 ${roundIndex + 1} 종료. 승자: ${results.winner || '동점'}`);
       adminVoteCurrent = null;
       updateAdminVoteUI();
     });
@@ -708,14 +708,14 @@
     socket.on('adminVoteRecorded', ({ option }) => {
       adminVoteCurrent = option;
       updateAdminVoteUI();
-      showToast(`Admin tiebreaker vote set to ${option}`);
+      showToast(`관리자 결정표가 ${option}안으로 설정됨`);
     });
 
     function updateStatusChip(status) {
       const map = {
-        waiting:  ['chip-status-waiting',  '⏳ Waiting'],
-        playing:  ['chip-status-playing',  '▶ Playing'],
-        finished: ['chip-status-finished', '✅ Finished'],
+        waiting:  ['chip-status-waiting',  '⏳ 대기 중'],
+        playing:  ['chip-status-playing',  '▶ 진행 중'],
+        finished: ['chip-status-finished', '✅ 종료'],
       };
       const [cls, label] = map[status] || ['chip-status-waiting', status];
       statusChip.className = 'status-chip ' + cls;
@@ -731,23 +731,23 @@
       btnAdminVoteA.classList.toggle('active', adminVoteCurrent === 'A');
       btnAdminVoteB.classList.toggle('active', adminVoteCurrent === 'B');
       adminVoteStatus.textContent = adminVoteCurrent
-        ? `Tiebreaker vote set to: Option ${adminVoteCurrent}`
-        : 'No tiebreaker vote set this round.';
+        ? `결정표가 ${adminVoteCurrent}안으로 설정됨`
+        : '이번 라운드에 결정표가 설정되지 않았습니다.';
     }
 
     function renderPlayers(players) {
       const nonAdmin = players.filter(p => !p.isAdmin);
       playerCountLabel.textContent = nonAdmin.length;
       if (nonAdmin.length === 0) {
-        playersTableWrap.innerHTML = '<div class="empty-state">No players yet.</div>';
+        playersTableWrap.innerHTML = '<div class="empty-state">참가자가 없습니다.</div>';
         return;
       }
       const rows = players.map(p => {
         let pillClass = p.isAdmin ? 'pill-admin' : p.isSpectator ? 'pill-spectator' : 'pill-alive';
-        let pillText  = p.isAdmin ? '👑 Admin' : p.isSpectator ? '💀 Spectator' : '💚 Alive';
+        let pillText  = p.isAdmin ? '👑 관리자' : p.isSpectator ? '💀 관전자' : '💚 생존';
         const connectedBadge = p.connected
-          ? '<span style="color:#86efac;font-size:.75rem">● online</span>'
-          : '<span style="color:#6b7280;font-size:.75rem">○ offline</span>';
+          ? '<span style="color:#86efac;font-size:.75rem">● 온라인</span>'
+          : '<span style="color:#6b7280;font-size:.75rem">○ 오프라인</span>';
         const voteCell = p.vote
           ? `<span style="font-weight:700;color:${p.vote==='A'?'#c084fc':'#60a5fa'}">${p.vote}</span>`
           : '<span style="color:var(--muted)">–</span>';
@@ -761,7 +761,7 @@
       playersTableWrap.innerHTML = `
         <table class="players-table">
           <thead><tr>
-            <th>Name</th><th>Status</th><th>Conn.</th><th>Vote</th>
+            <th>이름</th><th>상태</th><th>연결</th><th>투표</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>`;
@@ -770,21 +770,21 @@
     function renderRoundInfo(round, idx, total) {
       roundInfoBox.innerHTML = `
         <div style="margin-bottom:10px">
-          <div style="font-size:.75rem;color:var(--muted);margin-bottom:3px">Topic</div>
+          <div style="font-size:.75rem;color:var(--muted);margin-bottom:3px">주제</div>
           <div style="font-weight:600">${round.topic}</div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div style="background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.2);border-radius:8px;padding:10px">
-            <div style="font-size:.7rem;color:#c084fc;font-weight:700;margin-bottom:3px">OPTION A</div>
+            <div style="font-size:.7rem;color:#c084fc;font-weight:700;margin-bottom:3px">A안</div>
             <div style="font-size:.9rem">${round.optionA}</div>
           </div>
           <div style="background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px">
-            <div style="font-size:.7rem;color:#60a5fa;font-weight:700;margin-bottom:3px">OPTION B</div>
+            <div style="font-size:.7rem;color:#60a5fa;font-weight:700;margin-bottom:3px">B안</div>
             <div style="font-size:.9rem">${round.optionB}</div>
           </div>
         </div>
         <div style="margin-top:10px;font-size:.78rem;color:var(--muted)">
-          Round ${idx + 1} of ${total} · ${round.durationSeconds}s duration
+          라운드 ${idx + 1} / ${total} · ${round.durationSeconds}초
         </div>`;
     }
 
@@ -826,24 +826,24 @@
         div.className = 'round-item';
         div.innerHTML = `
           <div class="round-item-header">
-            <span class="round-num">Round ${idx + 1}</span>
-            <button class="btn btn-danger btn-sm" onclick="syncRoundDefs();removeRoundDef(${idx})">✕ Remove</button>
+            <span class="round-num">라운드 ${idx + 1}</span>
+            <button class="btn btn-danger btn-sm" onclick="syncRoundDefs();removeRoundDef(${idx})">✕ 삭제</button>
           </div>
           <div class="round-fields">
             <div class="field-group full">
-              <label>Topic / Question</label>
-              <input type="text" id="round_${idx}_topic" placeholder="e.g. Which is better?" value="${escHtml(r.topic)}" />
+              <label>주제 / 질문</label>
+              <input type="text" id="round_${idx}_topic" placeholder="예: 어떤 것이 더 낫나요?" value="${escHtml(r.topic)}" />
             </div>
             <div class="field-group">
-              <label>Option A</label>
-              <input type="text" id="round_${idx}_optionA" placeholder="Option A text" value="${escHtml(r.optionA)}" />
+              <label>A안</label>
+              <input type="text" id="round_${idx}_optionA" placeholder="A안 텍스트" value="${escHtml(r.optionA)}" />
             </div>
             <div class="field-group">
-              <label>Option B</label>
-              <input type="text" id="round_${idx}_optionB" placeholder="Option B text" value="${escHtml(r.optionB)}" />
+              <label>B안</label>
+              <input type="text" id="round_${idx}_optionB" placeholder="B안 텍스트" value="${escHtml(r.optionB)}" />
             </div>
             <div class="field-group">
-              <label>Duration (seconds)</label>
+              <label>시간 (초)</label>
               <input type="number" id="round_${idx}_duration" min="5" max="300" value="${r.durationSeconds}" />
             </div>
           </div>`;
@@ -864,32 +864,32 @@
       syncRoundDefs();
       const valid = roundDefs.filter(r => r.topic.trim() && r.optionA.trim() && r.optionB.trim());
       if (valid.length === 0) {
-        showToast('⚠️ Add at least one complete round first.');
+        showToast('⚠️ 먼저 완성된 라운드를 하나 이상 추가하세요.');
         return;
       }
       socket.emit('createGame', { rounds: valid });
-      showToast('✅ Game saved! ' + valid.length + ' round(s) created.');
+      showToast('✅ 게임 저장됨! ' + valid.length + '개의 라운드가 생성되었습니다.');
     });
 
     // ── Controls ──
     btnStartGame.addEventListener('click', () => {
       socket.emit('startGame');
-      showToast('▶ Game started!');
+      showToast('▶ 게임이 시작되었습니다!');
     });
 
     btnNextRound.addEventListener('click', () => {
       socket.emit('nextRound');
-      showToast('⏭ Skipping to next round…');
+      showToast('⏭ 다음 라운드로 건너뜁니다...');
     });
 
     btnResetGame.addEventListener('click', () => {
-      if (!confirm('Reset the game? This will clear all rounds and reset all players.')) return;
+      if (!confirm('게임을 초기화하시겠습니까? 모든 라운드가 삭제되고 모든 플레이어가 초기화됩니다.')) return;
       socket.emit('resetGame');
       roundDefs = [];
       renderRoundBuilder();
       adminVoteCurrent = null;
       updateAdminVoteUI();
-      showToast('↺ Game reset.');
+      showToast('↺ 게임이 초기화되었습니다.');
     });
 
     btnAdminVoteA.addEventListener('click', () => {
@@ -900,11 +900,11 @@
       socket.emit('adminVote', { option: 'B' });
     });
 
-    // ── Pre-load some example rounds ──
+    // ── 예시 라운드 미리 로드 ──
     [
-      { topic: 'What tastes better?', optionA: 'Pizza', optionB: 'Tacos', durationSeconds: 30 },
-      { topic: 'Better travel option?', optionA: 'Beach vacation', optionB: 'Mountain retreat', durationSeconds: 30 },
-      { topic: 'Best way to spend a free afternoon?', optionA: 'Read a book', optionB: 'Watch a movie', durationSeconds: 30 },
+      { topic: '뭐가 더 맛있나요?', optionA: '피자', optionB: '타코', durationSeconds: 30 },
+      { topic: '더 좋은 여행지는?', optionA: '해변 휴양', optionB: '산 휴양', durationSeconds: 30 },
+      { topic: '자유로운 오후를 보내는 최고의 방법은?', optionA: '책 읽기', optionB: '영화 보기', durationSeconds: 30 },
     ].forEach(r => roundDefs.push(r));
     renderRoundBuilder();
   </script>

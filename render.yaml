@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: more-balance
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render generates a secure random value automatically.
+      # After deploy, go to: Dashboard → your service → Environment
+      # to view or change the generated ADMIN_PASSWORD.
+      - key: ADMIN_PASSWORD
+        generateValue: true

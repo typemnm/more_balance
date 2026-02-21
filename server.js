@@ -29,6 +29,8 @@ function checkPassword(input) {
   }
 }
 
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const gameState = {
@@ -227,7 +229,7 @@ io.on('connection', (socket) => {
       socket.emit('adminLoggedIn');
       broadcastGameState(false);
     } else {
-      socket.emit('adminLoginFailed', { message: 'Invalid password' });
+      socket.emit('adminLoginFailed', { message: '잘못된 비밀번호' });
     }
   });
 
