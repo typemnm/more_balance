@@ -29,6 +29,8 @@ function checkPassword(input) {
   }
 }
 
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const gameState = {
